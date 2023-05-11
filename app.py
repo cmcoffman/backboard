@@ -1,5 +1,10 @@
 #import palmerpenguins
-from shiny import App, render, ui
+from shiny import App, reactive, render, ui
+
+import plotly.express as px
+import plotly.graph_objs as go
+from plotly.subplots import make_subplots
+from shinywidgets import output_widget, render_widget
 
 import os
 import pandas as pd
@@ -8,7 +13,6 @@ import sqlalchemy
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import URL
 from dotenv import load_dotenv
-
 
 
 # Import census API key - returns true if successful
@@ -31,44 +35,78 @@ url_object = URL.create(
 engine = sqlalchemy.create_engine(url_object)
 con=engine.connect()
 
-query = """
-SELECT *
-FROM tournament_results
-LIMIT 3
-"""
-df = pd.read_sql_query(sql=text(query), con=con)
 
 
 def run_query(query_str: str):
     df = pd.read_sql_query(sql=text(query_str), con=con)
     return df
 
-def get_player_results(player_id: int):
+# Cribbed from https://stackoverflow.com/a/62853540/3798609
+def performance_plot(df):
+    print(type(df['date']))
+    # Create subplot with secondary axis
+    subplot_fig = make_subplots(specs=[[{"secondary_y": True}]])
 
-    q_player_results = f"""
-    SELECT *
-    FROM player_results
-    WHERE player_id = {player_id}::text
-    """
-    df = run_query(q_player_results)
-    return df
+    #Put Dataframe in rating_fig and rank_fig
+    rating_fig = px.line(df, x='date', y='ratings_value', title='IFPA Rating')
+    rank_fig = px.line(df, x='date', y='wppr_rank', title='IFPA Ranking')
 
+    #Change the axis for ranking
+    rank_fig.update_traces(yaxis = 'y2')
+
+    #Add the figs to the subplot figure
+    subplot_fig.add_traces(rating_fig.data + rank_fig.data)
+
+    #FORMAT subplot figure
+    subplot_fig.update_layout(title='IFPA Player Stats', yaxis=dict(title='Rating'), 
+                              yaxis2=dict(title='Ranking', autorange='reversed'))
+    subplot_fig.for_each_trace(lambda t: t.update(line=dict(color=t.marker.color)))
+
+    #subplot_fig.show()
+    return go.FigureWidget(subplot_fig)
 
 app_ui = ui.page_fluid(
     ui.input_text("player_id", "IFPA Number:", value=83361),
-   # ui.output_text("requested_player_id"),
+    #ui.output_plot("plot"),
+    output_widget("perf_plot"),
     ui.output_table("result")
 )
 
 
 def server(input, output, session):
+    
+
+    @reactive.Calc
+    def get_player_results():
+        player_id = input.player_id()
+        q_player_results = f"""
+        SELECT *
+        FROM player_results
+        WHERE player_id = {player_id}::text
+        ORDER BY date
+        """
+        df = run_query(q_player_results)
+        return df
+    
+
     @output
-    # @render.text
-    # def requested_player_id():
-    #     return input.player_id()
+    @render_widget
+    def perf_plot():
+        df = get_player_results()
+        df['date'] = df['date'].astype('str')
+        return performance_plot(df)
+        
+
+    # @render.plot
+    # def plot():
+    #     player_results = get_player_results()
+    #     performance_plot(player_results)
+        
+    
+    @output
     @render.table
     def result():
-        player_results = get_player_results(input.player_id())
+        player_results = get_player_results()
         return player_results
 
 
