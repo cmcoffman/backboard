@@ -1,35 +1,22 @@
-## Overview
-# backboard
-1. What is your problem statement? What will you actually be doing?
-    - Make player performance data from Matchplay and IFPA more interpretable.
-    - Assessing if player performance in a tournament is "expected" or "unexpected" by modeling/predicting the outcome of a tournament given a set of players.
-    - Identifying key tournament venues and player groups with a network analysis of which players tend to play each other in tournaments.
-    - The final product looks like:
-        1. A webapp showing:
-            - Chart of rating/ranking history
-            - Breakdown of tournament performance vs expected tournament performance
-            - Map of tournament venues
-            - Diagram of local pinball "social network"
-        2. Backed by an SQL database which caches data from the API and adds new results when the player requests their latest results.
-        3. Tournament performance estimates based on modeling expected player performance, using orginal regession.
+About Backboard
+===============
 
-2. Who is your audience? Why will they care?
-    Pinball players:
-    1. There are no good tools to evalualate your performance other than point-value ranks and ratings.
-    2. It is difficult to know how well you did in a tournament because of the wide range in skill levels of the players. It is not easy to tell how "hard" the competition is with existing tools.
-    3. Locating places where tournaments happen:
-        - Tournament postings on the IFPA website are *very* poorly implemented and it is not easy to find the places which host regular tournaments. 
-        - Different venues are frequented by different groups of players with different skill levels. Some locations thus have "harder" tournaments which may or may not be appropriate for a player's skill level.
+Backboard is a tool for making pinball player data from IFPA more useful. [The International Flipper Pinball Association](https://www.ifpapinball.com/) (IFPA) tracks results from sanctioned pinball tournaments the world over and uses them to build rankings for regional, national, and international championship tournaments. The final standings in each tournament are factored into algorithms to determine a player's [rating](https://www.ifpapinball.com/menu/ranking-info-2/#rating). Competing in tournaments also awards [points](https://www.ifpapinball.com/menu/ranking-info-2/#base) by which championship rankings are determined.
 
-3. What is your success metric? How will you know if you are actually solving the problem in a useful way?
-    - Evaluating other player's response and use of the tool.
-    - Evaluating the model to see how well it predicts tournament results.
+The collected results for each player are made available on the IFPA website ([example](https://www.ifpapinball.com/player.php?p=83361)), but the presentation and clarity leaves something to be desired. While all the relevant information _is_ present- it's not easy to interpret trends in your metrics and the summary statistics provided are minimal.
 
-4. What is your data source? What format is your data in? How much cleaning and munging will be required?
-    - There are APIs from Matchplay and IFPA for all this data. There's little/no cleaning but it's definitely more than one table of data.
+Backboard makes this data more useful by showing graphs of a players rating and ranking history over time, providing additional summary statistics, and evaluating tournament-level performance with a new _Performance Score_.
 
-5. What are potential challenges or obstacles and how will you mitigate them?
-    - Figuring out the UX part of the webapp as well as the most efficient visualizations. I really want people to use this thing.
+### Performance Scores
 
-6. Is this a reasonable project given the time constraints that you have?
-    - I think so. The project is also useful even without comprehensive implementation because there really are so few tools to look at performance.
+A player's performance in a tournament is, ultimately, just the player's place/position at the end of play. This is used for point allocation and rating adjustments. However the skill levels of the players in a tournament can vary widely and it's difficult to gauge one's own performance relative to the other players' skill level.
+
+The **Performance Score** presented here indicates how much better (or worse) a player's position in the tournament was compared to predicted performance. IFPA ratings are based on a modified version of the [Glicko](https://en.wikipedia.org/wiki/Glicko_rating_system) rating system and intended to indicate the predicted outcome in a match. Thus, in theory, the outcome of a tournament _should_ be identical to a list of player rankings from highest to lowest. The **Performance Score** is the difference between this predicted standing and the actual one.
+
+For example, if a player has the 10th highest rating in a tournament, but ends up in 4th Place, their **Performance Score** would be 6. If a player had the 4th highest rating but ended up in 10th place, their performance score would be -6.
+
+### How it's done.
+
+Tournament results and player data are retrieved from the IFPA's [API](https://www.ifpapinball.com/api/documentation/) and collected into a PostgreSQL database hosted on [DigitalOcean](https://www.digitalocean.com/). Queries of this database are used to draw graphs with [Plotly](https://plotly.com/python/). This site was created with the [Shiny](https://shiny.rstudio.com/py/) framework and is hosted on [shinyapps.io](https://www.shinyapps.io/).
+
+"""
