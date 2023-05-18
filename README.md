@@ -1,4 +1,4 @@
-About Backboard
+[Backboard](https://n6nz8f-clayton0coffman.shinyapps.io/backboard/)
 ===============
 
 Backboard is a tool for making pinball player data from IFPA more useful. [The International Flipper Pinball Association](https://www.ifpapinball.com/) (IFPA) tracks results from sanctioned pinball tournaments the world over and uses them to build rankings for regional, national, and international championship tournaments. The final standings in each tournament are factored into algorithms to determine a player's [rating](https://www.ifpapinball.com/menu/ranking-info-2/#rating). Competing in tournaments also awards [points](https://www.ifpapinball.com/menu/ranking-info-2/#base) by which championship rankings are determined.
@@ -17,6 +17,4 @@ For example, if a player has the 10th highest rating in a tournament, but ends u
 
 ### How it's done.
 
-Tournament results and player data are retrieved from the IFPA's [API](https://www.ifpapinball.com/api/documentation/) and collected into a PostgreSQL database hosted on [DigitalOcean](https://www.digitalocean.com/). Queries of this database are used to draw graphs with [Plotly](https://plotly.com/python/). This site was created with the [Shiny](https://shiny.rstudio.com/py/) framework and is hosted on [shinyapps.io](https://www.shinyapps.io/).
-
-"""
+Tournament results and player data are retrieved from the IFPA's [API](https://www.ifpapinball.com/api/documentation/) and collected into a PostgreSQL database hosted on [DigitalOcean](https://www.digitalocean.com/). Queries of this database are used to draw graphs with [Plotly](https://plotly.com/python/). This [site](https://n6nz8f-clayton0coffman.shinyapps.io/backboard/) was created with the [Shiny](https://shiny.rstudio.com/py/) framework and is hosted on [shinyapps.io](https://www.shinyapps.io/).
